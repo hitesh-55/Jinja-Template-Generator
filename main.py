@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from crewai import Agent, Task, Crew, Process
 from typing import Optional, List, Dict, Any, Union
-
+from jinja_template_generator import JinjaTemplateGenerator
 # Set up OpenAI API key
 api_key = os.getenv("OPENAI_API_KEY")
 if not api_key:
@@ -261,6 +261,16 @@ def clean_template_output(result: Union[str, Dict[str, Any]]) -> str:
 # =============================================================================
 # API Endpoints
 # =============================================================================
+
+@app.post("/generate-template-v2")
+async def generate_template_v2(request: TemplateRequest):
+    return JinjaTemplateGenerator().generate_template(
+        user_prompt=request.user_prompt,
+        variables=request.variables,
+        sample_json=request.sample_json,
+        existing_template=request.existing_template,
+        detail_level=request.detail_level
+    )
 
 @app.post("/generate-template/", response_model=TemplateResponse, responses={500: {"model": ErrorResponse}})
 async def generate_template(request: TemplateRequest):
